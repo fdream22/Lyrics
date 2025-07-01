@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lirik Jepang dari Genius</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      padding: 2rem;
+    }
+    input, button {
+      width: 100%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+    }
+    input {
+      background-color: #1f1f1f;
+      color: #fff;
+    }
+    button {
+      background-color: #ffce00;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .lyrics-container, .results-container {
+      background-color: #1f1f1f;
+      padding: 1rem;
+      border-radius: 10px;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .error {
+      color: #f55;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .result-item {
+      padding: 0.5rem;
+      cursor: pointer;
+      border-bottom: 1px solid #333;
+    }
+    .result-item:hover {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 Lirik Jepang dari Genius</h1>
+  <input id="query" placeholder="Contoh: aimer kataomoi">
+  <button onclick="searchLyrics()">Cari Lirik</button>
+  <div class="results-container" id="results"></div>
+  <div class="lyrics-container" id="output"></div>
+  <div class="error" id="error"></div>  <script>
+    async function searchLyrics() {
+      const query = document.getElementById('query').value.trim();
+      const resultsDiv = document.getElementById('results');
+      const output = document.getElementById('output');
+      const error = document.getElementById('error');
+
+      resultsDiv.innerHTML = '';
+      output.innerHTML = '';
+      error.textContent = '';
+
+      if (!query) return error.textContent = 'Masukkan nama lagu atau artis.';
+
+      alert('🔎 Mencari lagu...');
+
+      const searchUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://genius.com/api/search/multi?per_page=5&q=' + query)}`;
+
+      try {
+        const res = await fetch(searchUrl);
+        const data = await res.json();
+        const json = JSON.parse(data.contents);
+
+        const sections = json.response.sections.find(s => s.type === 'song');
+        const songs = sections?.hits;
+        if (!songs || songs.length === 0) throw new Error('Lagu tidak ditemukan di Genius.');
+
+        songs.forEach(hit => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          item.textContent = `${hit.result.full_title}`;
+          item.onclick = () => ambilLirik(hit.result.url);
+          resultsDiv.appendChild(item);
+        });
+      } catch (e) {
+        error.textContent = e.message || 'Gagal mengambil hasil pencarian dari Genius.';
+      }
+    }
+
+    async function ambilLirik(songPageUrl) {
+      const output = document.getElementById('output');
+      const error = document.getElementById('error');
+      output.innerHTML = '';
+      error.textContent = '';
+
+      alert('🎶 Mengambil lirik...');
+
+      try {
+        const htmlRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(songPageUrl)}`);
+        const htmlData = await htmlRes.json();
+
+        const match = htmlData.contents.match(/<div class=\"lyrics\">([\s\S]*?)<\/div>/) || htmlData.contents.match(/<div class=\"Lyrics__Root.*?\">([\s\S]*?)<\/div>/);
+        if (!match) throw new Error('Lirik tidak bisa diambil.');
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = match[1];
+        const text = tempDiv.innerText.trim();
+
+        output.innerHTML = text
+          .split('\n')
+          .map(line => `<div>${line}</div>`) 
+          .join('');
+      } catch (e) {
+        error.textContent = e.message || 'Gagal mengambil lirik dari Genius.';
+      }
+    }
+  </script></body>
+</html>
