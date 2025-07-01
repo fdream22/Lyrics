@@ -1,126 +1,603 @@
-<!DOCTYPE html><html lang="ja">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lirik Jepang dari Genius</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      padding: 2rem;
-    }
-    input, button {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
-    }
-    input {
-      background-color: #1f1f1f;
-      color: #fff;
-    }
-    button {
-      background-color: #ffce00;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .lyrics-container, .results-container {
-      background-color: #1f1f1f;
-      padding: 1rem;
-      border-radius: 10px;
-      line-height: 1.8;
-      margin-bottom: 1rem;
-    }
-    .error {
-      color: #f55;
-      margin-top: 1rem;
-      text-align: center;
-    }
-    .result-item {
-      padding: 0.5rem;
-      cursor: pointer;
-      border-bottom: 1px solid #333;
-    }
-    .result-item:hover {
-      background-color: #333;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lirik Lagu Jepang dengan Romaji</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/wanakana"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <style>
+        :root {
+            --primary: #1DB954;
+            --dark: #121212;
+            --dark-gray: #282828;
+            --gray: #535353;
+            --light-gray: #b3b3b3;
+            --white: #ffffff;
+            --font-jp: 'Noto Sans JP', sans-serif;
+            --font-main: 'Roboto', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--white);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: var(--white);
+        }
+
+        .search-container {
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-right: 50px;
+            border-radius: 30px;
+            border: none;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--primary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-50%) scale(1.05);
+            background-color: #1ed760;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 30px 0 80px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--white);
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Home Page */
+        .home-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), #25a5be);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: var(--light-gray);
+            max-width: 700px;
+        }
+
+        .trending-section {
+            margin-top: 60px;
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: left;
+            color: var(--white);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--dark-gray);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background-color: #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Search Results */
+        .results-container {
+            margin-top: 30px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .result-count {
+            color: var(--light-gray);
+            font-size: 1.1rem;
+        }
+
+        /* Lyrics Page */
+        .lyrics-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .lyrics-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lyrics-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: var(--white);
+        }
+
+        .lyrics-artist {
+            font-size: 1.4rem;
+            color: var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary);
+            color: var(--dark);
+        }
+
+        .lyrics-content {
+            background-color: rgba(40, 40, 40, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .lyric-block {
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .japanese-line {
+            font-family: var(--font-jp);
+            font-size: 1.6rem;
+            margin-bottom: 5px;
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .romaji-line {
+            font-size: 1.1rem;
+            color: var(--light-gray);
+            font-style: italic;
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-gray);
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: var(--light-gray);
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .trending-grid,
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+
+            .lyrics-title {
+                font-size: 1.8rem;
+            }
+
+            .japanese-line {
+                font-size: 1.3rem;
+            }
+
+            .romaji-line {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🎤 Lirik Jepang dari Genius</h1>
-  <input id="query" placeholder="Contoh: aimer kataomoi">
-  <button onclick="searchLyrics()">Cari Lirik</button>
-  <div class="results-container" id="results"></div>
-  <div class="lyrics-container" id="output"></div>
-  <div class="error" id="error"></div>  <script>
-    async function searchLyrics() {
-      const query = document.getElementById('query').value.trim();
-      const resultsDiv = document.getElementById('results');
-      const output = document.getElementById('output');
-      const error = document.getElementById('error');
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <span>🎵</span> 
+                <div>JLyrics<span>.id</span></div>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Cari lagu atau artis...">
+                <button class="search-button" id="searchButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="var(--dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
 
-      resultsDiv.innerHTML = '';
-      output.innerHTML = '';
-      error.textContent = '';
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Home Page -->
+            <section id="homePage">
+                <div class="home-container">
+                    <h1 class="hero-title">Temukan Lirik Lagu Jepang Favoritmu</h1>
+                    <p class="hero-subtitle">Cari lirik lagu Jepang dengan romaji, terjemahan, dan info lengkap. Dapatkan pengalaman seperti Spotify untuk musik Jepang!</p>
+                    
+                    <div class="search-container" style="max-width: 600px;">
+                        <input type="text" class="search-input" id="homeSearchInput" placeholder="Cari lagu atau artis...">
+                        <button class="search-button" id="homeSearchButton">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="var(--dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="trending-section">
+                        <h2 class="section-title">Trending Lagu Jepang</h2>
+                        <div class="trending-grid" id="trendingSongs"></div>
+                    </div>
+                </div>
+            </section>
 
-      if (!query) return error.textContent = 'Masukkan nama lagu atau artis.';
+            <!-- Search Results Page -->
+            <section id="resultsPage" style="display: none;">
+                <h2 class="page-title">Hasil Pencarian</h2>
+                <div class="result-header">
+                    <h3 class="section-title">Ditemukan</h3>
+                    <div class="result-count" id="resultCount">0 hasil</div>
+                </div>
+                <div class="results-container">
+                    <div class="results-grid" id="searchResults"></div>
+                </div>
+            </section>
 
-      alert('🔎 Mencari lagu...');
+            <!-- Lyrics Page -->
+            <section id="lyricsPage" style="display: none;">
+                <div class="lyrics-container">
+                    <div class="lyrics-header">
+                        <button class="back-button" id="backButton">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Kembali
+                        </button>
+                        <h1 class="lyrics-title" id="songTitle">Judul Lagu</h1>
+                        <h2 class="lyrics-artist" id="songArtist">Nama Artis</h2>
+                    </div>
+                    
+                    <div class="lyrics-content">
+                        <div id="lyricsContent">
+                            <!-- Lyrics content will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      const searchUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://genius.com/api/search/multi?per_page=5&q=' + query)}`;
+            <!-- Loading State -->
+            <div class="loading-container" id="loadingState" style="display: none;">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </main>
 
-      try {
-        const res = await fetch(searchUrl);
-        const data = await res.json();
-        const json = JSON.parse(data.contents);
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">JLyrics<span>.id</span></div>
+                <p class="footer-text">© 2023 Layanan Lirik Lagu Jepang dengan Romaji. Semua hak dilindungi.</p>
+                <p class="footer-text">Ditenagai oleh LRC-Lib API & Wanakana.js</p>
+            </div>
+        </div>
+    </footer>
 
-        const sections = json.response.sections.find(s => s.type === 'song');
-        const songs = sections?.hits;
-        if (!songs || songs.length === 0) throw new Error('Lagu tidak ditemukan di Genius.');
+    <script>
+        // DOM Elements
+        const homePage = document.getElementById('homePage');
+        const resultsPage = document.getElementById('resultsPage');
+        const lyricsPage = document.getElementById('lyricsPage');
+        const loadingState = document.getElementById('loadingState');
+        const searchInput = document.getElementById('searchInput');
+        const homeSearchInput = document.getElementById('homeSearchInput');
+        const searchButton = document.getElementById('searchButton');
+        const homeSearchButton = document.getElementById('homeSearchButton');
+        const backButton = document.getElementById('backButton');
+        const trendingSongs = document.getElementById('trendingSongs');
+        const searchResults = document.getElementById('searchResults');
+        const lyricsContent = document.getElementById('lyricsContent');
+        const songTitle = document.getElementById('songTitle');
+        const songArtist = document.getElementById('songArtist');
+        const resultCount = document.getElementById('resultCount');
 
-        songs.forEach(hit => {
-          const item = document.createElement('div');
-          item.className = 'result-item';
-          item.textContent = `${hit.result.full_title}`;
-          item.onclick = () => ambilLirik(hit.result.url);
-          resultsDiv.appendChild(item);
+        // Trending songs data (mock data for demo)
+        const trendingSongsData = [
+            { id: 1, title: "Lemon", artist: "Kenshi Yonezu", image: "https://i.ytimg.com/vi/SX_ViT4Ra7k/maxresdefault.jpg" },
+            { id: 2, title: "Pretender", artist: "Official HIGE DANdism", image: "https://i.ytimg.com/vi/TQ8WlA2GXbk/maxresdefault.jpg" },
+            { id: 3, title: "Uchiage Hanabi", artist: "DAOKO × Kenshi Yonezu", image: "https://i.ytimg.com/vi/CfihYWRWRTQ/maxresdefault.jpg" },
+            { id: 4, title: "Yoru ni Kakeru", artist: "YOASOBI", image: "https://i.ytimg.com/vi/x8VYWazR5mE/maxresdefault.jpg" },
+            { id: 5, title: "KICK BACK", artist: "Kenshi Yonezu", image: "https://i.ytimg.com/vi/pYz6Ue8uXg0/maxresdefault.jpg" },
+            { id: 6, title: "Gurenge", artist: "LiSA", image: "https://i.ytimg.com/vi/3g2kIhWZVP8/maxresdefault.jpg" }
+        ];
+
+        // Initialize ScrollReveal
+        ScrollReveal().reveal('.card', { 
+            interval: 100,
+            scale: 0.9,
+            easing: 'cubic-bezier(0.5, 0, 0, 1)',
+            viewFactor: 0.1
         });
-      } catch (e) {
-        error.textContent = e.message || 'Gagal mengambil hasil pencarian dari Genius.';
-      }
-    }
 
-    async function ambilLirik(songPageUrl) {
-      const output = document.getElementById('output');
-      const error = document.getElementById('error');
-      output.innerHTML = '';
-      error.textContent = '';
+        // Display trending songs on home page
+        function displayTrendingSongs() {
+            trendingSongs.innerHTML = '';
+            trendingSongsData.forEach(song => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-image" style="background-image: url('${song.image}')"></div>
+                    <div class="card-content">
+                        <div class="card-title">${song.title}</div>
+                        <div class="card-subtitle">${song.artist}</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    fetchLyrics(song.id, song.title, song.artist);
+                });
+                trendingSongs.appendChild(card);
+            });
+        }
 
-      alert('🎶 Mengambil lirik...');
+        // Show loading state
+        function showLoading() {
+            loadingState.style.display = 'flex';
+        }
 
-      try {
-        const htmlRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(songPageUrl)}`);
-        const htmlData = await htmlRes.json();
+        // Hide loading state
+        function hideLoading() {
+            loadingState.style.display = 'none';
+        }
 
-        const match = htmlData.contents.match(/<div class=\"lyrics\">([\s\S]*?)<\/div>/) || htmlData.contents.match(/<div class=\"Lyrics__Root.*?\">([\s\S]*?)<\/div>/);
-        if (!match) throw new Error('Lirik tidak bisa diambil.');
+        // Search function
+        function search(query) {
+            if (!query.trim()) return;
+            
+            showLoading();
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                // Mock search results
+                const mockResults = [
+                    { id: 1, title: "Lemon", artist: "Kenshi Yonezu", image: "https://i.ytimg.com/vi/SX_ViT4Ra7k/maxresdefault.jpg" },
+                    { id: 2, title: "Pretender", artist: "Official HIGE DANdism", image: "https://i.ytimg.com/vi/TQ8WlA2GXbk/maxresdefault.jpg" },
+                    { id: 3, title: "Yoru ni Kakeru", artist: "YOASOBI", image: "https://i.ytimg.com/vi/x8VYWazR5mE/maxresdefault.jpg" },
+                    { id: 4, title: "Gurenge", artist: "LiSA", image: "https://i.ytimg.com/vi/3g2kIhWZVP8/maxresdefault.jpg" },
+                    { id: 5, title: "KICK BACK", artist: "Kenshi Yonezu", image: "https://i.ytimg.com/vi/pYz6Ue8uXg0/maxresdefault.jpg" },
+                    { id: 6, title: "Uchiage Hanabi", artist: "DAOKO × Kenshi Yonezu", image: "https://i.ytimg.com/vi/CfihYWRWRTQ/maxresdefault.jpg" }
+                ];
+                
+                // Filter results based on query
+                const filteredResults = mockResults.filter(song => 
+                    song.title.toLowerCase().includes(query.toLowerCase()) || 
+                    song.artist.toLowerCase().includes(query.toLowerCase())
+                );
+                
+                displaySearchResults(filteredResults);
+                hideLoading();
+            }, 800);
+        }
 
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = match[1];
-        const text = tempDiv.innerText.trim();
-
-        output.innerHTML = text
-          .split('\n')
-          .map(line => `<div>${line}</div>`) 
-          .join('');
-      } catch (e) {
-        error.textContent = e.message || 'Gagal mengambil lirik dari Genius.';
-      }
-    }
-  </script></body>
-</html>
+        // Display search results
+        function displaySearchResults(results) {
+            homePage.style.display = 'none';
+            resultsPage.style.display 
